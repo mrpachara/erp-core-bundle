@@ -1,0 +1,4 @@
+services:
+#    erp_core.example:
+#        class: Erp\Bundle\CoreBundle\Example
+#        arguments: ["@service_id", "plain_value", %parameter%]
