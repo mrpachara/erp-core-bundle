@@ -1,6 +1,6 @@
 <?php
 
-namespace AppBundle\Entity;
+namespace Erp\Bundle\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -10,6 +10,7 @@ use Erp\Bundle\CoreBundle\Model\AccountInterface;
  * @ORM\Entity
  * @ORM\Table(name="public.account", uniqueConstraints={@ORM\UniqueConstraint(columns={"code"})})
  * @ORM\InheritanceType("JOINED")
+ * @ORM\DiscriminatorMap({"core_account" = "Account"})
  */
 class Account implements AccountInterface{
     /**
