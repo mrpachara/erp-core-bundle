@@ -2,7 +2,9 @@
 
 namespace Erp\Bundle\CoreBundle\Model;
 
-interface AccountInterface{
+/**
+ */
+interface CoreAccountInterface{
     /**
      * Get id
      *
@@ -17,7 +19,7 @@ interface AccountInterface{
      *
      * @return AccountInterface
      */
-    public function setCode($code);
+    public function setCode(string $code);
 
     /**
      * Get code
@@ -33,5 +35,12 @@ interface AccountInterface{
      *
      * @return AccountInterface
      */
-    public function setName($name);
+    public function setName(string $name);
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName();
 }
