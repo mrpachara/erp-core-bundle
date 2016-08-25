@@ -7,13 +7,17 @@ use Doctrine\ORM\Mapping as ORM;
 use Erp\Bundle\CoreBundle\Model\ThingInterface;
 
 use Erp\Bundle\CoreBundle\Model\CoreAccountInterface;
-use Erp\Bundle\CoreBundle\Model\ThingBaseInterface;
+
+use Erp\Bundle\CoreBundle\Model\CoreAccountTrait;
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="public.account", uniqueConstraints={@ORM\UniqueConstraint(columns={"code"})})
+ * @ORM\InheritanceType("JOINED")
  */
-class CoreAccount implements CoreAccountInterface, ThingBaseInterface{
+class CoreAccount implements CoreAccountInterface{
+    use CoreAccountTrait;
+
     /**
      * @ORM\Id
      * @ORM\Column(type="bigint")
@@ -42,40 +46,7 @@ class CoreAccount implements CoreAccountInterface, ThingBaseInterface{
      * constructor
      */
     public function __construct(){
+        parent::__construct();
         $this->thing = new Thing();
-    }
-
-    public function setThing(ThingInterface $thing){
-        $this->thing = $thing;
-
-        return $this;
-    }
-
-    public function getThing(){
-        return $this->thing;
-    }
-
-    public function getId(){
-        return $this->id;
-    }
-
-    public function setCode(string $code){
-        $this->code = $code;
-
-        return $this;
-    }
-
-    public function getCode(){
-        return $this->code;
-    }
-
-    public function setName(string $name){
-        $this->thing->setName($name);
-
-        return $this;
-    }
-
-    public function getName(){
-        return $this->thing->getName();
     }
 }

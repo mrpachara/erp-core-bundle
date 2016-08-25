@@ -6,11 +6,14 @@ use Doctrine\ORM\Mapping as ORM;
 
 use Erp\Bundle\CoreBundle\Model\ThingInterface;
 
+use Erp\Bundle\CoreBundle\Model\ThingTrait;
 /**
  * @ORM\Entity
  * @ORM\Table(name="public.thing")
  */
 class Thing implements ThingInterface{
+    use ThingTrait;
+
     /**
      * @ORM\Id
      * @ORM\Column(type="bigint")
@@ -31,19 +34,6 @@ class Thing implements ThingInterface{
      * constructor
      */
     public function __construct(){
-    }
-
-    public function getId(){
-        return $this->id;
-    }
-
-    public function setName(string $name){
-        $this->thing->setName($name);
-
-        return $this;
-    }
-
-    public function getName(){
-        return $this->thing->getName();
+        parent::construct();
     }
 }

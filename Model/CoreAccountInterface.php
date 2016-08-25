@@ -3,6 +3,7 @@
 namespace Erp\Bundle\CoreBundle\Model;
 
 /**
+ * Core account Interface
  */
 interface CoreAccountInterface{
     /**
@@ -13,11 +14,27 @@ interface CoreAccountInterface{
     public function getId();
 
     /**
+     * Set thing
+     *
+     * @param ThingInterface $thing
+     *
+     * @return CoreAccountInterface
+     */
+    public function setThing(ThingInterface $thing);
+
+    /**
+     * Get thing
+     *
+     * @return ThingInterface
+     */
+    public function getThing();
+
+    /**
      * Set code
      *
      * @param string $code
      *
-     * @return AccountInterface
+     * @return CoreAccountInterface
      */
     public function setCode(string $code);
 
@@ -33,7 +50,7 @@ interface CoreAccountInterface{
      *
      * @param string $name
      *
-     * @return AccountInterface
+     * @return CoreAccountInterface
      */
     public function setName(string $name);
 

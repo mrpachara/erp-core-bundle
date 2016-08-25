@@ -3,6 +3,7 @@
 namespace Erp\Bundle\CoreBundle\Model;
 
 /**
+ * Thing Interface
  */
 interface ThingInterface{
     /**
