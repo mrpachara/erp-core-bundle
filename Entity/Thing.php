@@ -34,6 +34,5 @@ class Thing implements ThingInterface{
      * constructor
      */
     public function __construct(){
-        parent::construct();
     }
 }

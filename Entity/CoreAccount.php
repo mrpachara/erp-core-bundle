@@ -11,7 +11,7 @@ use Erp\Bundle\CoreBundle\Model\CoreAccountInterface;
 use Erp\Bundle\CoreBundle\Model\CoreAccountTrait;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Erp\Bundle\CoreBundle\Repository\ORM\CoreAccountRepository")
  * @ORM\Table(name="public.account", uniqueConstraints={@ORM\UniqueConstraint(columns={"code"})})
  * @ORM\InheritanceType("JOINED")
  */
@@ -28,8 +28,8 @@ class CoreAccount implements CoreAccountInterface{
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Thing", cascade={"persist"})
-     * @ORM\JoinColumn(name="id_thing", nullable=false, onDelete="cascade")
+     * @ORM\ManyToOne(targetEntity="Thing", cascade={"persist", "merge"})
+     * @ORM\JoinColumn(name="id_thing", nullable=false, onDelete="RESTRICT")
      *
      * @var ThingInterface
      */
@@ -44,9 +44,10 @@ class CoreAccount implements CoreAccountInterface{
 
     /**
      * constructor
+     *
+     * @param ThingInterface $thing
      */
-    public function __construct(){
-        parent::__construct();
-        $this->thing = new Thing();
+    public function __construct(ThingInterface $thing = null){
+        $this->thing = (null === $thing)? new Thing() : $thing;
     }
 }

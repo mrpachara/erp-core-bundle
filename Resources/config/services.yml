@@ -2,3 +2,6 @@ services:
 #    erp_core.example:
 #        class: Erp\Bundle\CoreBundle\Example
 #        arguments: ["@service_id", "plain_value", %parameter%]
+    erp_core.service.core_account:
+        class: Erp\Bundle\CoreBundle\Service\Impl\CoreAccountService
+        arguments: ["@=service('doctrine').getRepository('ErpCoreBundle:CoreAccount')"]
