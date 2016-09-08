@@ -3,6 +3,7 @@
 namespace Erp\Bundle\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMSSerializer;
 
 use Erp\Bundle\CoreBundle\Model\ThingInterface;
 
@@ -14,6 +15,8 @@ use Erp\Bundle\CoreBundle\Model\CoreAccountTrait;
  * @ORM\Entity(repositoryClass="Erp\Bundle\CoreBundle\Repository\ORM\CoreAccountRepository")
  * @ORM\Table(name="public.account", uniqueConstraints={@ORM\UniqueConstraint(columns={"code"})})
  * @ORM\InheritanceType("JOINED")
+ *
+ * @JMSSerializer\ExclusionPolicy("all")
  */
 class CoreAccount implements CoreAccountInterface{
     use CoreAccountTrait;

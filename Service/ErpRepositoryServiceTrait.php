@@ -42,8 +42,8 @@ trait ErpRepositoryServiceTrait{
     /**
      * @inheritDoc
      */
-    public function findOneBy(array $criteria){
-        return $this->getRepository()->findOneBy($criteria);
+    public function findOneBy(array $criteria, array $orderBy = null){
+        return $this->getRepository()->findOneBy($criteria, $orderBy);
     }
 
     /**
@@ -72,5 +72,66 @@ trait ErpRepositoryServiceTrait{
      */
     public function thing(ThingInterface $thing){
         return $this->getRepository()->thing($entity);
+    }
+
+    /**
+     * Adds support for magic finders.
+     *
+     * @param string $method
+     * @param array  $arguments
+     *
+     * @return array|object The found entity/entities.
+     *
+     * @throws \BadMethodCallException If the method called is an invalid find* method
+     *                                 or no find* method at all and therefore an invalid
+     *                                 method call.
+     */
+    public function __call($method, $arguments)
+    {
+        switch(true){
+            case (0 === strpos($method, 'findBy')):
+                $by = substr($method, 6);
+                $method = 'findBy';
+                break;
+
+            case (0 === strpos($method, 'findOneBy')):
+                $by = substr($method, 9);
+                $method = 'findOneBy';
+                break;
+
+            default:
+                throw new \BadMethodCallException(
+                    "Undefined method '$method'."
+                );
+        }
+
+        if (empty($arguments)){
+            throw new \BadMethodCallException(
+                "You need to pass a parameter to '".$method . $by."'"
+            );
+        }
+
+        $fieldName = lcfirst(\Doctrine\Common\Util\Inflector::classify($by));
+
+        switch (count($arguments)) {
+            case 1:
+                return $this->$method(array($fieldName => $arguments[0]));
+
+            case 2:
+                return $this->$method(array($fieldName => $arguments[0]), $arguments[1]);
+
+            case 3:
+                return $this->$method(array($fieldName => $arguments[0]), $arguments[1], $arguments[2]);
+
+            case 4:
+                return $this->$method(array($fieldName => $arguments[0]), $arguments[1], $arguments[2], $arguments[3]);
+
+            default:
+                // Do nothing
+        }
+
+        throw new \BadMethodCallException(
+            "Invalid parameter to '".$method . $by."'"
+        );
     }
 }

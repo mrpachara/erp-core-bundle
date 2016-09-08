@@ -91,7 +91,6 @@ class CoreAccountController extends Controller
      */
     public function editAction(Request $request, CoreAccount $coreAccount)
     {
-        dump($coreAccount);
         $deleteForm = $this->createDeleteForm($coreAccount);
         $editForm = $this->createForm('Erp\Bundle\CoreBundle\Form\CoreAccountType', $coreAccount);
         $editForm->handleRequest($request);
