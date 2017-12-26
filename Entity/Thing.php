@@ -2,37 +2,75 @@
 
 namespace Erp\Bundle\CoreBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-
-use Erp\Bundle\CoreBundle\Model\ThingInterface;
-
-use Erp\Bundle\CoreBundle\Model\ThingTrait;
 /**
- * @ORM\Entity
- * @ORM\Table(name="public.thing")
+ * Thing Entity
  */
-class Thing implements ThingInterface{
-    use ThingTrait;
-
+class Thing{
     /**
-     * @ORM\Id
-     * @ORM\Column(type="bigint")
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     *
      * @var string
      */
-    private $id;
+    protected $id;
 
     /**
-     * @ORM\Column(type="string", length=256)
-     *
      * @var string
      */
-    private $name;
+    protected $name;
 
     /**
-     * constructor
+     * @var bool
      */
-    public function __construct(){
+    protected $active = true;
+
+    /**
+     * Get id
+     *
+     * @return string
+     */
+    public function getId(){
+        return $this->id;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return Thing
+     */
+    public function setName(string $name){
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName(){
+        return $this->name;
+    }
+
+    /**
+     * Set active
+     *
+     * @param bool $active
+     *
+     * @return Thing
+     */
+    public function setActive(bool $active){
+        $this->active = $active;
+
+        return $this;
+    }
+
+    /**
+     * Get active
+     *
+     * @return bool
+     */
+    public function getActive(){
+        return $this->active;
     }
 }

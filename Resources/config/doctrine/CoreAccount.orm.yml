@@ -1,0 +1,30 @@
+Erp\Bundle\CoreBundle\Entity\CoreAccount:
+  type: entity
+  repositoryClass: Erp\Bundle\CoreBundle\Infrastructure\ORM\Repository\CoreAccountRepository
+  table: core_account
+  uniqueConstraints:
+    core_account_code_uinx:
+      columns: code
+  inheritanceType: JOINED
+  id:
+    id:
+      type: bigint
+      generator:
+        strategy: IDENTITY
+  fields:
+    code:
+      type: string
+      length: 64
+      nullable: false
+    remark:
+      type: text
+      nullable: true
+  manyToOne:
+    thing:
+      targetEntity: Thing
+      joinColumn:
+        name: id_thing
+        nullable: false
+        onDelete: RESTRICT
+      cascade: ["persist", "merge", "detach"]
+      fetch: EAGER

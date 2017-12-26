@@ -1,0 +1,10 @@
+Erp\Bundle\CoreBundle\Entity\CoreAccount:
+  access_type: property
+  properties:
+    thing:
+      exclude: true
+    name:
+      type: string
+      accessor:
+        getter: getName
+        setter: setName

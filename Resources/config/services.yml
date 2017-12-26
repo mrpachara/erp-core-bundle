@@ -1,7 +1,76 @@
+parameters:
+  # workaround for JMS Serializer
+  jms_serializer.identical_property_naming_strategy.class: JMS\Serializer\Naming\IdenticalPropertyNamingStrategy
+
 services:
 #    erp_core.example:
 #        class: Erp\Bundle\CoreBundle\Example
 #        arguments: ["@service_id", "plain_value", %parameter%]
-    erp_core.service.core_account:
-        class: Erp\Bundle\CoreBundle\Service\Impl\CoreAccountService
-        arguments: ["@=service('doctrine').getRepository('ErpCoreBundle:CoreAccount')"]
+
+  # workaround for JMS Serializer
+  jms_serializer.identical_property_naming_strategy:
+      class: "%jms_serializer.identical_property_naming_strategy.class%"
+      public: false
+
+#  erp_core.serializer.doctrine_object_constructor:
+#    class: "%jms_serializer.doctrine_object_constructor.class%"
+#    arguments:
+#      - "@doctrine"
+#      - "@jms_serializer.unserialize_object_constructor"
+#    public: false
+
+#  jms_serializer.doctrine_object_constructor:
+#    class: Erp\Bundle\CoreBundle\Serializer\InitializedObjectConstructor
+#    arguments:
+#      - "@erp_core.serializer.doctrine_object_constructor"
+#    public: false
+
+  erp_core.serializer.naming_strategy:
+    class: "%jms_serializer.serialized_name_annotation_strategy.class%"
+    arguments:
+      - "@jms_serializer.identical_property_naming_strategy"
+    public: false
+
+  jms_serializer.naming_strategy:
+    alias: erp_core.serializer.naming_strategy
+    public: false
+
+#  jms_serializer.object_constructor:
+#    alias: "%jms_serializer.doctrine_object_constructor%"
+#    public: false
+
+  erp_core.collection_factory:
+    class: Erp\Bundle\CoreBundle\Collection\CollectionFactory
+
+  erp_core.initialized_object_constructor:
+    class: Erp\Bundle\CoreBundle\Serializer\InitializedObjectConstructor
+    public: false
+    arguments:
+      - "@jms_serializer.object_constructor"
+
+  jms_serializer.serializer:
+    class: Erp\Bundle\CoreBundle\Serializer\Serializer
+    public: true
+    arguments:
+      - "@jms_serializer.metadata_factory"
+      - "@jms_serializer.handler_registry"
+      - "@erp_core.initialized_object_constructor"
+      - "@=service('erp_core.collection_factory').map()"
+      - "@=service('erp_core.collection_factory').map()"
+      - "@jms_serializer.event_dispatcher"
+      - "@?jms_serializer.type_parser"
+      - ~
+    calls:
+      - [setSerializationContextFactory, ["@jms_serializer.serialization_context_factory"]]
+      - [setDeserializationContextFactory, ["@jms_serializer.deserialization_context_factory"]]
+
+  # CQRS
+  erp_core.cqrs.core_account:
+    class: Erp\Bundle\CoreBundle\Domain\CQRS\CQRSContainer
+    arguments:
+      - "@=service('doctrine').getRepository('ErpCoreBundle:CoreAccount')"
+      - "@=service('doctrine').getRepository('ErpCoreBundle:CoreAccount')"
+
+#    erp_core.service.core_account:
+#        class: Erp\Bundle\CoreBundle\Service\Impl\CoreAccountService
+#        arguments: ["@=service('doctrine').getRepository('ErpCoreBundle:CoreAccount')"]

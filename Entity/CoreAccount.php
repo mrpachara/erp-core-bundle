@@ -2,55 +2,176 @@
 
 namespace Erp\Bundle\CoreBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation as JMSSerializer;
-
-use Erp\Bundle\CoreBundle\Model\ThingInterface;
-
-use Erp\Bundle\CoreBundle\Model\CoreAccountInterface;
-
-use Erp\Bundle\CoreBundle\Model\CoreAccountTrait;
-
 /**
- * @ORM\Entity(repositoryClass="Erp\Bundle\CoreBundle\Repository\ORM\CoreAccountRepository")
- * @ORM\Table(name="public.account", uniqueConstraints={@ORM\UniqueConstraint(columns={"code"})})
- * @ORM\InheritanceType("JOINED")
- *
- * @JMSSerializer\ExclusionPolicy("all")
+ * Core account Entity
  */
-class CoreAccount implements CoreAccountInterface{
-    use CoreAccountTrait;
+abstract class CoreAccount implements StatusPresentable  {
 
     /**
-     * @ORM\Id
-     * @ORM\Column(type="bigint")
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     *
-     * @var string
-     */
+    * @var string
+    */
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Thing", cascade={"persist", "merge"})
-     * @ORM\JoinColumn(name="id_thing", nullable=false, onDelete="RESTRICT")
-     *
-     * @var ThingInterface
+     * @var string
      */
-    private $thing;
+    protected $code;
 
     /**
-     * @ORM\Column(type="string", length=64)
+     * Dummy for serializable
      *
      * @var string
      */
-    private $code;
+    protected $name;
 
     /**
-     * constructor
-     *
-     * @param ThingInterface $thing
+     * @var string
      */
-    public function __construct(ThingInterface $thing = null){
-        $this->thing = (null === $thing)? new Thing() : $thing;
+    protected $remark;
+
+    /**
+     * @var Thing
+     */
+    protected $thing;
+
+    /**
+     * ConstructorTest
+     *
+     * @param Thing|null $thing
+     */
+    public function __construct(Thing $thing = null){
+      $this->thing = ($thing === null)? new Thing() : $thing;
+    }
+
+    /**
+     * Get id
+     *
+     * @return string
+     */
+    public function getId(){
+        return $this->id;
+    }
+
+    /**
+     * Set thing
+     *
+     * @param Thing $thing
+     *
+     * @return CoreAccount
+     */
+    public function setThing(Thing $thing){
+        $this->thing = $thing;
+
+        return $this;
+    }
+
+    /**
+     * Get thing
+     *
+     * @return Thing
+     */
+    public function getThing(){
+        return $this->thing;
+    }
+
+    /**
+     * Set code
+     *
+     * @param string $code
+     *
+     * @return CoreAccount
+     */
+    public function setCode(string $code){
+        $this->code = $code;
+
+        return $this;
+    }
+
+    /**
+     * Get code
+     *
+     * @return string
+     */
+    public function getCode(){
+        return $this->code;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return CoreAccount
+     */
+    public function setName(string $name){
+        if(null === $this->thing) $this->thing = new Thing();
+        $this->thing->setName($name);
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName(){
+        if(null === $this->thing) $this->thing = new Thing();
+        return $this->thing->getName();
+    }
+
+    /**
+     * Set remark
+     *
+     * @param string $remark
+     *
+     * @return static
+     */
+    public function setRemark(string $remark){
+        $this->remark = $remark;
+
+        return $this;
+    }
+
+    /**
+     * Get remark
+     *
+     * @return string
+     */
+    public function getRemark(){
+        return $this->remark;
+    }
+
+    /**
+     * Set active
+     *
+     * @param bool $active
+     *
+     * @return CoreAccount
+     */
+    public function setActive(bool $active){
+      if(null === $this->thing) $this->thing = new Thing();
+      $this->thing->setActive($active);
+
+      return $this;
+    }
+
+    /**
+     * Get active
+     *
+     * @return bool
+     */
+    public function getActive(){
+      if(null === $this->thing) $this->thing = new Thing();
+      return $this->thing->getActive();
+    }
+
+    public function updatable(){
+      // TODO: must checks ative but allows save when change active value
+      return true;
+    }
+
+    public function deletable(){
+      return true;
     }
 }
