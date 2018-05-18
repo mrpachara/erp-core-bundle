@@ -2,7 +2,7 @@
 
 namespace Erp\Bundle\CoreBundle\Security;
 
-use Erp\Bundle\CoreBundle\Entity\StatusPresentable;
+use Erp\Bundle\CoreBundle\Security\StatusPresentable;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 

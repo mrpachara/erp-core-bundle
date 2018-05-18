@@ -1,0 +1,31 @@
+Erp\Bundle\CoreBundle\Entity\Generator:
+  type: entity
+  repositoryClass: Erp\Bundle\CoreBundle\Infrastructure\ORM\Repository\GeneratorRepository
+  table: core_generator
+  uniqueConstraints:
+    core_generator_code_uinx:
+      columns: code
+  id:
+    id:
+      type: bigint
+      generator:
+        strategy: IDENTITY
+  fields:
+    code:
+      type: string
+      length: 64
+      nullable: false
+    prefix:
+      type: string
+      length: 64
+      nullable: false
+    seqgroup:
+      type: string
+      length: 64
+      nullable: true
+    length:
+      type: integer
+      nullable: false
+    seqnum:
+      type: integer
+      nullable: false

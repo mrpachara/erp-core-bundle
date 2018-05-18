@@ -1,9 +1,6 @@
 Erp\Bundle\CoreBundle\Entity\Thing:
   type: entity
   table: thing
-  indexes:
-    thing_active_idx:
-      columns: [ active ]
   id:
     id:
       type: bigint
@@ -14,8 +11,3 @@ Erp\Bundle\CoreBundle\Entity\Thing:
       type: string
       length: 255
       nullable: false
-    active:
-      type: boolean
-      nullable: false
-      options:
-        default: true

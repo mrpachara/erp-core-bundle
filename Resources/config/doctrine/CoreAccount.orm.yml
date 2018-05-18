@@ -1,10 +1,13 @@
 Erp\Bundle\CoreBundle\Entity\CoreAccount:
   type: entity
-  repositoryClass: Erp\Bundle\CoreBundle\Infrastructure\ORM\Repository\CoreAccountRepository
+  #repositoryClass: Erp\Bundle\CoreBundle\Infrastructure\ORM\Repository\CoreAccountRepository
   table: core_account
   uniqueConstraints:
     core_account_code_uinx:
       columns: code
+  indexes:
+    core_account_active_idx:
+      columns: [ active ]
   inheritanceType: JOINED
   id:
     id:
@@ -16,6 +19,11 @@ Erp\Bundle\CoreBundle\Entity\CoreAccount:
       type: string
       length: 64
       nullable: false
+    active:
+      type: boolean
+      nullable: false
+      options:
+        default: true
     remark:
       type: text
       nullable: true

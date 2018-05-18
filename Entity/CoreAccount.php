@@ -5,7 +5,8 @@ namespace Erp\Bundle\CoreBundle\Entity;
 /**
  * Core account Entity
  */
-abstract class CoreAccount implements StatusPresentable  {
+abstract class CoreAccount implements StatusPresentable
+{
 
     /**
     * @var string
@@ -25,6 +26,11 @@ abstract class CoreAccount implements StatusPresentable  {
     protected $name;
 
     /**
+     * @var boolean
+     */
+    protected $active = true;
+
+    /**
      * @var string
      */
     protected $remark;
@@ -39,8 +45,9 @@ abstract class CoreAccount implements StatusPresentable  {
      *
      * @param Thing|null $thing
      */
-    public function __construct(Thing $thing = null){
-      $this->thing = ($thing === null)? new Thing() : $thing;
+    public function __construct(Thing $thing = null)
+    {
+        $this->thing = ($thing === null)? new Thing() : $thing;
     }
 
     /**
@@ -48,7 +55,8 @@ abstract class CoreAccount implements StatusPresentable  {
      *
      * @return string
      */
-    public function getId(){
+    public function getId()
+    {
         return $this->id;
     }
 
@@ -59,7 +67,8 @@ abstract class CoreAccount implements StatusPresentable  {
      *
      * @return CoreAccount
      */
-    public function setThing(Thing $thing){
+    public function setThing(Thing $thing)
+    {
         $this->thing = $thing;
 
         return $this;
@@ -70,7 +79,8 @@ abstract class CoreAccount implements StatusPresentable  {
      *
      * @return Thing
      */
-    public function getThing(){
+    public function getThing()
+    {
         return $this->thing;
     }
 
@@ -81,7 +91,8 @@ abstract class CoreAccount implements StatusPresentable  {
      *
      * @return CoreAccount
      */
-    public function setCode(string $code){
+    public function setCode(string $code)
+    {
         $this->code = $code;
 
         return $this;
@@ -92,7 +103,8 @@ abstract class CoreAccount implements StatusPresentable  {
      *
      * @return string
      */
-    public function getCode(){
+    public function getCode()
+    {
         return $this->code;
     }
 
@@ -103,8 +115,11 @@ abstract class CoreAccount implements StatusPresentable  {
      *
      * @return CoreAccount
      */
-    public function setName(string $name){
-        if(null === $this->thing) $this->thing = new Thing();
+    public function setName(string $name)
+    {
+        if (null === $this->thing) {
+            $this->thing = new Thing();
+        }
         $this->thing->setName($name);
 
         return $this;
@@ -115,9 +130,36 @@ abstract class CoreAccount implements StatusPresentable  {
      *
      * @return string
      */
-    public function getName(){
-        if(null === $this->thing) $this->thing = new Thing();
+    public function getName()
+    {
+        if (null === $this->thing) {
+            $this->thing = new Thing();
+        }
         return $this->thing->getName();
+    }
+
+    /**
+     * Set active
+     *
+     * @param bool $active
+     *
+     * @return Thing
+     */
+    public function setActive(bool $active)
+    {
+        $this->active = $active;
+
+        return $this;
+    }
+
+    /**
+     * Get active
+     *
+     * @return bool
+     */
+    public function getActive()
+    {
+        return $this->active;
     }
 
     /**
@@ -127,7 +169,8 @@ abstract class CoreAccount implements StatusPresentable  {
      *
      * @return static
      */
-    public function setRemark(string $remark){
+    public function setRemark(string $remark)
+    {
         $this->remark = $remark;
 
         return $this;
@@ -138,40 +181,18 @@ abstract class CoreAccount implements StatusPresentable  {
      *
      * @return string
      */
-    public function getRemark(){
+    public function getRemark()
+    {
         return $this->remark;
     }
 
-    /**
-     * Set active
-     *
-     * @param bool $active
-     *
-     * @return CoreAccount
-     */
-    public function setActive(bool $active){
-      if(null === $this->thing) $this->thing = new Thing();
-      $this->thing->setActive($active);
-
-      return $this;
+    public function updatable()
+    {
+        return $this->active;
     }
 
-    /**
-     * Get active
-     *
-     * @return bool
-     */
-    public function getActive(){
-      if(null === $this->thing) $this->thing = new Thing();
-      return $this->thing->getActive();
-    }
-
-    public function updatable(){
-      // TODO: must checks ative but allows save when change active value
-      return true;
-    }
-
-    public function deletable(){
-      return true;
+    public function deletable()
+    {
+        return $this->active;
     }
 }
