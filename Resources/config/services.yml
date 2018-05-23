@@ -93,7 +93,9 @@ services:
     arguments:
       - "@doctrine.orm.default_entity_manager"
 
-  Erp\Bundle\CoreBundle\Domain\CQRS\SimpleCommandHandler: '@Erp\Bundle\CoreBundle\Infrastructure\ORM\Service\SimpleCommandHandlerService'
+  Erp\Bundle\CoreBundle\Domain\CQRS\SimpleCommandHandler:
+    alias: Erp\Bundle\CoreBundle\Infrastructure\ORM\Service\SimpleCommandHandlerService
+    public: true
 
   Erp\Bundle\CoreBundle\Infrastructure\ORM\Service\SimpleCommandService:
     arguments:
@@ -110,3 +112,11 @@ services:
 
   # alias
   Erp\Bundle\CoreBundle\Domain\CQRS\SimpleCommand: '@Erp\Bundle\CoreBundle\Infrastructure\ORM\Service\SimpleCommandService'
+  Erp\Bundle\CoreBundle\Domain\CQRS\TempFileItemQuery:
+    alias: Erp\Bundle\CoreBundle\Infrastructure\ORM\Service\TempFileItemQueryService
+    public: true
+
+  #Entity Listerner
+  Erp\Bundle\CoreBundle\Infrastructure\ORM\Listener\TempFileItemListener:
+    tags:
+      - { name: doctrine.orm.entity_listener, entity: Erp\Bundle\CoreBundle\Entity\TempFileItem, event: preFlush }
