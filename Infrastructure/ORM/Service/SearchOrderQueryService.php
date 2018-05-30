@@ -30,6 +30,8 @@ class SearchOrderQueryService implements SearchQuery
         $this->configureOptions($resolver);
         $options = $resolver->resolve($options);
 
+        if(!empty($params['order'])) array_unshift($options['fields'], $params['order']);
+
         foreach($options['fields'] as $orderBy) {
             $orderByExts = explode(' ', $orderBy);
             $filedName = $this->qh->generateFieldName($qb, $alias, $orderByExts[0]);
