@@ -5,6 +5,7 @@ namespace Erp\Bundle\CoreBundle\Infrastructure\ORM\Repository;
 use Doctrine\ORM;
 
 use Doctrine\DBAL;
+use Erp\Bundle\CoreBundle\Entity\Generator;
 
 /**
  * generator repository (ORM)

@@ -10,7 +10,7 @@ class TempFileItem
     /** @var string */
     private $uuid;
 
-    /** @var DateTimeImmutable */
+    /** @var \DateTimeImmutable */
     private $tstmp;
 
     /** @var resource */

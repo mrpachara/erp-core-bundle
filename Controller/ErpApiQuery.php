@@ -7,8 +7,6 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Psr\Http\Message\ServerRequestInterface;
 
-use Erp\CoreBundle\Entity\StatusPresentable;
-
 /**
  * ERP Api Query
  *

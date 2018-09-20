@@ -20,7 +20,7 @@ class CoreAccountApiQueryController extends CoreAccountApiQuery {
   protected $domainQuery;
 
   /**
-   * @var \Erp\Bundle\CoreBundle\Authorization\AbstractCoreAccountAuthorizationService
+   * @var \Erp\Bundle\CoreBundle\Authorization\AbstractCoreAccountAuthorization
    *
    * @DI\Inject("erp_core.service.authorization.core_account")
    */
