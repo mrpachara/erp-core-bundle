@@ -43,8 +43,10 @@ class SearchWhereQueryService implements SearchQuery
         $options = $resolver->resolve($options);
 
         $i = 0;
+        $wheres = [];
         foreach($this->filterByKey($params) as $key => $value) {
             if(in_array($key, $options['fields'])) {
+                $wheres[$key] = $value;
                 $filedName = $this->qh->generateFieldName($qb, $alias, $key);
                 $valueName = "_value_search_where_{$i}";
                 $i++;
@@ -55,6 +57,8 @@ class SearchWhereQueryService implements SearchQuery
             }
         }
 
+        $context['searchOption'] = $wheres;
+        
         return $qb;
     }
 

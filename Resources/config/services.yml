@@ -110,6 +110,10 @@ services:
     tags:
       - { name: twig.runtime }
 
+  Erp\Bundle\CoreBundle\Twig\AsumRuntime:
+    tags:
+      - { name: twig.runtime }
+
   # alias
   Erp\Bundle\CoreBundle\Domain\CQRS\SimpleCommand: '@Erp\Bundle\CoreBundle\Infrastructure\ORM\Service\SimpleCommandService'
   Erp\Bundle\CoreBundle\Domain\CQRS\TempFileItemQuery:
