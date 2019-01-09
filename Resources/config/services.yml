@@ -119,6 +119,8 @@ services:
   Erp\Bundle\CoreBundle\Domain\CQRS\TempFileItemQuery:
     alias: Erp\Bundle\CoreBundle\Infrastructure\ORM\Service\TempFileItemQueryService
     public: true
+    
+  Erp\Bundle\CoreBundle\Domain\CQRS\Query\CoreAccountQuery: '@Erp\Bundle\CoreBundle\Infrastructure\ORM\Query\CoreAccountQuery'
 
   #Entity Listerner
   Erp\Bundle\CoreBundle\Infrastructure\ORM\Listener\TempFileItemListener:
