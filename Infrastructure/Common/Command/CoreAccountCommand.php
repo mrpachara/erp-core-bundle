@@ -41,6 +41,8 @@ class CoreAccountCommand implements CommandInterface
         $persistanceCommand = $this->persistanceCommand;
         $commandHandler = $this->commandHandler;
         return function() use($target, $origin, $domainQuery, $persistanceCommand, $commandHandler) {
+            if($target->getThing() === $origin->getThing()) return;
+            
             $oldThing = $target->getThing();
             /**
              * @var CoreAccount $account

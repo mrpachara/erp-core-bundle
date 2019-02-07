@@ -46,10 +46,8 @@ class CoreAccountRelatedApiCommandController
     {
         $idTarget = $id;
         $idOrigin = $request->getQueryParams()['with'];
-        $commandHandler =  $this->commandHandler;
-        $domainCommand = $this->domainCommand;
         
-        $commandHandler->execute(function() use($idTarget, $idOrigin, $commandHandler, $domainCommand) {
+        $this->commandHandler->execute(function() use($idTarget, $idOrigin) {
             /**
              * @var \Erp\Bundle\CoreBundle\Entity\CoreAccount $target
              */
@@ -59,11 +57,12 @@ class CoreAccountRelatedApiCommandController
              */
             $origin = $this->domainQuery->find($idOrigin, LockMode::PESSIMISTIC_WRITE);
             
-            $commandHandler->invoke($domainCommand->merge($target, $origin));
+            $this->commandHandler->invoke($this->domainCommand->merge($target, $origin));
         });
         
         return [
             'info' => 'success',
+            'data' => $this->domainQuery->find($idTarget),
         ];
     }
 }
