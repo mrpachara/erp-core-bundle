@@ -8,7 +8,7 @@ use Erp\Bundle\CoreBundle\Entity\CoreAccount;
  * @author pachara
  *        
  */
-interface CoreAccountQuery
+interface CoreAccountQuery extends ErpQuery
 {
     /**
      * Get other related CoreAccount.
@@ -16,6 +16,6 @@ interface CoreAccountQuery
      * @param CoreAccount $account
      * @return array
      */
-    function getRelatedAccount(CoreAccount $account): array;
+    function getRelatedAccount(CoreAccount $account, $lockMode = null): array;
 }
 
