@@ -13,7 +13,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
 class CommandHandler implements CommandHandlerInterface
 {
     /**
-     * @var EntityManagerInterface $em
+     * @var EntityManagerInterface
      */
     private $em;
     

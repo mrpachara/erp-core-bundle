@@ -59,7 +59,7 @@ abstract class CoreAccount implements StatusPresentable
     {
         return $this->id;
     }
-
+    
     /**
      * Set thing
      *

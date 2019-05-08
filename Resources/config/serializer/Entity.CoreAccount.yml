@@ -1,10 +1,19 @@
 Erp\Bundle\CoreBundle\Entity\CoreAccount:
   access_type: property
+  discriminator:
+    groups: [short]
   properties:
+    id:
+      type: string
+      groups: [short]
     thing:
       exclude: true
+    code:
+      type: string
+      groups: [short]
     name:
       type: string
       accessor:
         getter: getName
         setter: setName
+      groups: [short]
