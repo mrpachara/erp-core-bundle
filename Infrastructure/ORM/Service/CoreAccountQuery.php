@@ -35,13 +35,10 @@ abstract class CoreAccountQuery extends ErpQuery implements QueryInterface
         return $result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function findThing(Thing $thing)
+    public function findByThing(Thing $thing)
     {
         $arguments = func_get_args();
 
-        return call_user_func_array([$this->repository, 'findThing'], $arguments);
+        return call_user_func_array([$this->repository, 'findByThing'], $arguments);
     }
 }

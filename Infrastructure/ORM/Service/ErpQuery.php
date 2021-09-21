@@ -99,22 +99,41 @@ abstract class ErpQuery implements QueryInterface
         return call_user_func_array([$this->repository, 'getClassName'], $arguments);
     }
 
-    public function searchQueryBuilder(array $params, string $alias = null, &$context = null)
+    private $runningNumber = 0;
+
+    public function getUniqueAlias() : string
     {
+        return "{static::DOMAIN_ALIAS}_".($this->runningNumber++);
+    }
+
+    public function createQueryBuilder(string $alias) : QueryBuilder
+    {
+        return $this->repository->createQueryBuilder($alias);
+    }
+
+    public function applySearchFilter(QueryBuilder $qb, array $params, string $alias, &$context = null) : QueryBuilder {
         $context = (array)$context;
-        $qb = $this->repository->createQueryBuilder($alias);
 
         $searchOptions = $this->searchOptions();
         foreach($this->searchQueries as $searchQuery) {
             $searchQuery->assign(
-                $qb, $params, self::DOMAIN_ALIAS,
+//                $qb, $params, static::DOMAIN_ALIAS,
+                $qb, $params, $alias,
                 (isset($searchOptions[$searchQuery->paramName()]))?
                     $searchOptions[$searchQuery->paramName()] : [],
                 $context
             );
         }
-        
+
         return $qb;
+    }
+
+    public function searchQueryBuilder(array $params, string $alias, &$context = null)
+    {
+        $context = (array)$context;
+        $qb = $this->createQueryBuilder($alias);
+
+        return $this->applySearchFilter($qb, $params, $alias, $context);
     }
 
     /**
@@ -141,7 +160,7 @@ abstract class ErpQuery implements QueryInterface
     public function search(array $params, array &$context = null)
     {
         $context = (array)$context;
-        $qb = $this->searchQueryBuilder($params, self::DOMAIN_ALIAS, $context);
+        $qb = $this->searchQueryBuilder($params, static::DOMAIN_ALIAS, $context);
         return $this->qh->execute($qb->getQuery(), $params, $context);
     }
 

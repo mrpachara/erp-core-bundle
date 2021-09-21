@@ -24,5 +24,5 @@ interface CoreAccountQuery extends ErpQuery
      *
      * @return array
      */
-    public function findThing(Thing $thing);
+    public function findByThing(Thing $thing);
 }
