@@ -16,21 +16,23 @@ trait ErpAuthorizationTrait
         return $output;
     }
 
-    protected function grant($action, $params = null)
+    protected function grant($actions, $params = null)
     {
-        if(!$this->authorization) return false;
+        $actions = (array) $actions;
+        if(!$this->authorization || empty($actions)) return false;
 
-        $action = $this->normalizeActionName($action);
-        $params = (array)$params;
-        $result = false;
         try {
-            if(call_user_func_array([$this->authorization, $action], $params)) {
-                $result = true;
+            foreach($actions as $action) {
+                $action = $this->normalizeActionName($action);
+                $params = (array)$params;
+                if(!call_user_func_array([$this->authorization, $action], $params)) {
+                    return false;
+                }
             }
         } catch(\Exception $excp) {
-            //dump($excp);
+            return false;
         }
 
-        return $result;
+        return true;
     }
 }

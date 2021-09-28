@@ -2,10 +2,11 @@
 
 namespace Erp\Bundle\CoreBundle\Controller;
 
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * ERP Api Query
@@ -41,19 +42,22 @@ abstract class ErpApiQuery extends FOSRestController
         return $context;
     }
 
-    protected function listQuery($grant, ServerRequestInterface $request, $callback)
+    protected function listQuery(ServerRequestInterface $request, $callbacks)
     {
-        if (!$this->grant($grant, [])) {
-            throw new UnprocessableEntityHttpException("List is not allowed.");
+        foreach($callbacks as $grantText => $callback) {
+            $grants = preg_split('/\s+/', $grantText);
+            if (!$this->grant($grants, [])) continue;
+
+            $queryParams = $request->getQueryParams();
+            $items = [];
+            $context = [];
+
+            $items = $callback($queryParams, $context);
+
+            return $this->view($this->listResponse($items, $context), 200);
         }
 
-        $queryParams = $request->getQueryParams();
-        $items = [];
-        $context = [];
-
-        $items = $callback($queryParams, $context);
-
-        return $this->view($this->listResponse($items, $context), 200);
+        throw new AccessDeniedException("List is not allowed.");
     }
 
     /**
@@ -65,17 +69,20 @@ abstract class ErpApiQuery extends FOSRestController
      */
     public function listAction(ServerRequestInterface $request)
     {
-        return $this->listQuery('list', $request, function($queryParams, &$context) {
-            if (!empty($queryParams)) {
-                return $this->domainQuery->search($queryParams, $context);
-            } else {
-                return $this->domainQuery->findAll();
-            }
-        });
+        return $this->listQuery($request, [
+            'list' => function($queryParams, &$context) {
+                if (!empty($queryParams)) {
+                    return $this->domainQuery->search($queryParams, $context);
+                } else {
+                    return $this->domainQuery->findAll();
+                }
+            },
+        ]);
     }
 
     protected function getResponse($data, $context)
     {
+        if(empty($data)) throw new NotFoundHttpException("Entity not found.");
         $context = $this->prepareContext($context);
 
         $context['actions'][] = 'edit';
@@ -87,23 +94,24 @@ abstract class ErpApiQuery extends FOSRestController
         return $context;
     }
 
-    protected function getQuery($grant, $id, ServerRequestInterface $request, $callback)
+    protected function getQuery($id, ServerRequestInterface $request, $callbacks)
     {
-        if (!$this->grant($grant, [])) {
-            throw new UnprocessableEntityHttpException("Get is not allowed.");
+        foreach($callbacks as $grantText => $callback) {
+            $grants = preg_split('/\s+/', $grantText);
+            if (!$this->grant($grants, [])) continue;
+
+            $queryParams = $request->getQueryParams();
+            $item = null;
+            $context = [];
+
+            $item = $callback($id, $queryParams, $context);
+
+            if (!$this->grant($grants, [$item])) continue;
+
+            return $this->view($this->getResponse($item, $context), 200);
         }
 
-        $queryParams = $request->getQueryParams();
-        $item = null;
-        $context = [];
-
-        $item = $callback($id, $queryParams, $context);
-
-        if (!$this->grant($grant, [$item])) {
-            throw new UnprocessableEntityHttpException("Get is not allowed.");
-        }
-
-        return $this->view($this->getResponse($item, $context), 200);
+        throw new AccessDeniedException("Get is not allowed.");
     }
 
     /**
@@ -116,8 +124,10 @@ abstract class ErpApiQuery extends FOSRestController
      */
     public function getAction($id, ServerRequestInterface $request)
     {
-        return $this->getQuery('get', $id, $request, function($id, $queryParams, &$context) {
-            return $this->domainQuery->find($id);
-        });
+        return $this->getQuery($id, $request, [
+            'get' => function($id, $queryParams, &$context) {
+                return $this->domainQuery->find($id);
+            },
+        ]);
     }
 }

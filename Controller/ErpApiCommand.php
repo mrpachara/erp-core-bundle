@@ -5,7 +5,7 @@ namespace Erp\Bundle\CoreBundle\Controller;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Erp\Bundle\CoreBundle\Domain\Adapter\LockMode;
@@ -84,7 +84,7 @@ abstract class ErpApiCommand extends FOSRestController
     protected function createCommand($grant, Request $request, $callback)
     {
         if (!$this->grant($grant, [])) {
-            throw new UnprocessableEntityHttpException("Create is not allowed.");
+            throw new AccessDeniedException("Create is not allowed.");
         }
 
         $data = $this->extractData($request, self::FOR_CREATE);
@@ -92,13 +92,13 @@ abstract class ErpApiCommand extends FOSRestController
         $item = $this->commandHandler->execute(function ($em) use ($callback, $data, $grant) {
             $class = $this->domainQuery->getClassName();
             if (!($item = $callback($class, $data))) {
-                throw new UnprocessableEntityHttpException("Create is not allowed.");
+                throw new AccessDeniedException("Create is not allowed.");
             }
 
             if($this instanceof InitialItem) $this->initialItem($item);
             $em->persist($item);
             if (!$this->grant($grant, [$item])) {
-                throw new UnprocessableEntityHttpException("Create is not allowed.");
+                throw new AccessDeniedException("Create is not allowed.");
             }
 
             return $this->patchExistedItem($item, $data);
@@ -124,7 +124,7 @@ abstract class ErpApiCommand extends FOSRestController
     protected function updateCommand($grant, $id, Request $request, $callback)
     {
         if (!$this->grant($grant, [])) {
-            throw new UnprocessableEntityHttpException("Update is not allowed.");
+            throw new AccessDeniedException("Update is not allowed.");
         }
 
         $data = $this->extractData($request, self::FOR_UPDATE);
@@ -135,7 +135,7 @@ abstract class ErpApiCommand extends FOSRestController
             }
             $em->lock($item, LockMode::PESSIMISTIC_WRITE);
             if (!$this->grant($grant, [$item])) {
-                throw new UnprocessableEntityHttpException("Update is not allowed.");
+                throw new AccessDeniedException("Update is not allowed.");
             }
 
             return $this->patchExistedItem($item, $data);
@@ -162,7 +162,7 @@ abstract class ErpApiCommand extends FOSRestController
     protected function deleteCommand($grant, $id, Request $request, $callback)
     {
         if (!$this->grant($grant, [])) {
-            throw new UnprocessableEntityHttpException("Delete is not allowed.");
+            throw new AccessDeniedException("Delete is not allowed.");
         }
 
         $item = $this->commandHandler->execute(function ($em) use ($callback, $id) {
@@ -171,7 +171,7 @@ abstract class ErpApiCommand extends FOSRestController
             }
             $em->lock($item, LockMode::PESSIMISTIC_WRITE);
             if (!$this->grant('delete', [$item])) {
-                throw new UnprocessableEntityHttpException("Delete is not allowed.");
+                throw new AccessDeniedException("Delete is not allowed.");
             }
 
             $em->remove($item);
