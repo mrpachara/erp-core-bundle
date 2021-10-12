@@ -81,30 +81,33 @@ abstract class ErpApiCommand extends FOSRestController
         ));
     }
 
-    protected function createCommand($grant, Request $request, $callback)
+    protected function createCommand(Request $request, $callbacks)
     {
-        if (!$this->grant($grant, [])) {
-            throw new AccessDeniedException("Create is not allowed.");
+        foreach($callbacks as $grantText => $callback) {
+            $grants = preg_split('/\s+/', $grantText);
+            if (!$this->grant($grants, [])) continue;
+
+            $data = $this->extractData($request, self::FOR_CREATE);
+
+            $item = $this->commandHandler->execute(function ($em) use ($callback, $data, $grants) {
+                $class = $this->domainQuery->getClassName();
+                if (!($item = $callback($class, $data))) {
+                    throw new AccessDeniedException("Create is not allowed.");
+                }
+
+                if($this instanceof InitialItem) $this->initialItem($item);
+                $em->persist($item);
+                if (!$this->grant($grants, [$item])) {
+                    throw new AccessDeniedException("Create is not allowed.");
+                }
+
+                return $this->patchExistedItem($item, $data);
+            });
+
+            return $this->view(['data' => $this->domainQuery->find($item->getId())], 200);
         }
 
-        $data = $this->extractData($request, self::FOR_CREATE);
-
-        $item = $this->commandHandler->execute(function ($em) use ($callback, $data, $grant) {
-            $class = $this->domainQuery->getClassName();
-            if (!($item = $callback($class, $data))) {
-                throw new AccessDeniedException("Create is not allowed.");
-            }
-
-            if($this instanceof InitialItem) $this->initialItem($item);
-            $em->persist($item);
-            if (!$this->grant($grant, [$item])) {
-                throw new AccessDeniedException("Create is not allowed.");
-            }
-
-            return $this->patchExistedItem($item, $data);
-        });
-
-        return $this->view(['data' => $this->domainQuery->find($item->getId())], 200);
+        throw new AccessDeniedException("Create is not allowed.");
     }
 
     /**
@@ -116,32 +119,37 @@ abstract class ErpApiCommand extends FOSRestController
      */
     public function createAction(Request $request)
     {
-        return $this->createCommand('add', $request, function ($class, &$data) {
-            return new $class();
-        });
+        return $this->createCommand($request, [
+            'add' => function ($class, &$data) {
+                return new $class();
+            },
+        ]);
     }
 
-    protected function updateCommand($grant, $id, Request $request, $callback)
+    protected function updateCommand($id, Request $request, $callbacks)
     {
-        if (!$this->grant($grant, [])) {
-            throw new AccessDeniedException("Update is not allowed.");
+        foreach($callbacks as $grantText => $callback) {
+            $grants = preg_split('/\s+/', $grantText);
+            if (!$this->grant($grants, [])) continue;
+
+            $data = $this->extractData($request, self::FOR_UPDATE);
+
+            $item = $this->commandHandler->execute(function ($em) use ($callback, $id, $data, $grants) {
+                if (!($item = $callback($id, $data))) {
+                    throw new NotFoundHttpException("Entity not found.");
+                }
+                $em->lock($item, LockMode::PESSIMISTIC_WRITE);
+                if (!$this->grant($grants, [$item])) {
+                    throw new AccessDeniedException("Update is not allowed.");
+                }
+
+                return $this->patchExistedItem($item, $data);
+            });
+
+            return $this->view(['data' => $this->domainQuery->find($item->getId())], 200);
         }
 
-        $data = $this->extractData($request, self::FOR_UPDATE);
-
-        $item = $this->commandHandler->execute(function ($em) use ($callback, $id, $data, $grant) {
-            if (!($item = $callback($id, $data))) {
-                throw new NotFoundHttpException("Entity not found.");
-            }
-            $em->lock($item, LockMode::PESSIMISTIC_WRITE);
-            if (!$this->grant($grant, [$item])) {
-                throw new AccessDeniedException("Update is not allowed.");
-            }
-
-            return $this->patchExistedItem($item, $data);
-        });
-
-        return $this->view(['data' => $this->domainQuery->find($item->getId())], 200);
+        throw new AccessDeniedException("Update is not allowed.");
     }
 
     /**
@@ -154,31 +162,36 @@ abstract class ErpApiCommand extends FOSRestController
      */
     public function updateAction($id, Request $request)
     {
-        return $this->updateCommand('edit', $id, $request, function ($id, &$data) {
-            return $this->domainQuery->find($id);
-        });
+        return $this->updateCommand($id, $request, [
+            'edit' => function ($id, &$data) {
+                return $this->domainQuery->find($id);
+            },
+        ]);
     }
 
-    protected function deleteCommand($grant, $id, Request $request, $callback)
+    protected function deleteCommand($id, Request $request, $callbacks)
     {
-        if (!$this->grant($grant, [])) {
-            throw new AccessDeniedException("Delete is not allowed.");
+        foreach($callbacks as $grantText => $callback) {
+            $grants = preg_split('/\s+/', $grantText);
+            if (!$this->grant($grants, [])) continue;
+
+            $item = $this->commandHandler->execute(function ($em) use ($callback, $id, $grants) {
+                if (!($item = $callback($id))) {
+                    throw new NotFoundHttpException("Entity not found.");
+                }
+                $em->lock($item, LockMode::PESSIMISTIC_WRITE);
+                if (!$this->grant($grants, [$item])) {
+                    throw new AccessDeniedException("Delete is not allowed.");
+                }
+
+                $em->remove($item);
+                return $item;
+            });
+
+            return $this->view(['data' => $item], 200);
         }
 
-        $item = $this->commandHandler->execute(function ($em) use ($callback, $id) {
-            if (!($item = $callback($id))) {
-                throw new NotFoundHttpException("Entity not found.");
-            }
-            $em->lock($item, LockMode::PESSIMISTIC_WRITE);
-            if (!$this->grant('delete', [$item])) {
-                throw new AccessDeniedException("Delete is not allowed.");
-            }
-
-            $em->remove($item);
-            return $item;
-        });
-
-        return $this->view(['data' => $item], 200);
+        throw new AccessDeniedException("Delete is not allowed.");
     }
 
     /**
@@ -191,8 +204,10 @@ abstract class ErpApiCommand extends FOSRestController
      */
     public function deleteAction($id, Request $request)
     {
-        return $this->deleteCommand('delete', $id, $request, function ($id) {
-            return $this->domainQuery->find($id);
-        });
+        return $this->deleteCommand($id, $request, [
+            'delete' => function ($id) {
+                return $this->domainQuery->find($id);
+            },
+        ]);
     }
 }
