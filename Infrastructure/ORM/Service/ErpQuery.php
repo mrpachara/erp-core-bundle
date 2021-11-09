@@ -128,7 +128,7 @@ abstract class ErpQuery implements QueryInterface
         return $qb;
     }
 
-    public function searchQueryBuilder(array $params, string $alias, &$context = null)
+    public function searchQueryBuilder(array $params, string $alias, &$context = null) : QueryBuilder
     {
         $context = (array)$context;
         $qb = $this->createQueryBuilder($alias);
