@@ -2,6 +2,9 @@
 
 namespace Erp\Bundle\CoreBundle\Controller;
 
+use Erp\Bundle\CoreBundle\Authorization\ContinueException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+
 trait ErpAuthorizationTrait
 {
     /** @var \Erp\Bundle\CoreBundle\Authorization\AbstractErpAuthorization */
@@ -34,5 +37,21 @@ trait ErpAuthorizationTrait
         }
 
         return true;
+    }
+
+    protected function tryGrant($callbacks)
+    {
+        foreach($callbacks as $grantText => $callback) {
+            $grants = preg_split('/\s+/', $grantText);
+            if (!$this->grant($grants, [])) continue;
+
+            $result = $callback($grants);
+
+            if($result instanceof ContinueException) continue;
+
+            return $result;
+        }
+
+        return new AccessDeniedException();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Erp\Bundle\CoreBundle\Controller;
 
+use Erp\Bundle\CoreBundle\Authorization\ContinueException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
@@ -44,20 +45,26 @@ abstract class ErpApiQuery extends FOSRestController
 
     protected function listQuery(ServerRequestInterface $request, $callbacks)
     {
-        foreach($callbacks as $grantText => $callback) {
-            $grants = preg_split('/\s+/', $grantText);
-            if (!$this->grant($grants, [])) continue;
+        $newCallbacks = array_map(function($callback) use ($request) {
+            return function($grants) use ($request, $callback) {
+                $queryParams = $request->getQueryParams();
+                $items = [];
+                $context = [];
 
-            $queryParams = $request->getQueryParams();
-            $items = [];
-            $context = [];
+                $items = $callback($queryParams, $context);
 
-            $items = $callback($queryParams, $context);
+                return [$items, $context];
+            };
+        }, $callbacks);
 
-            return $this->view($this->listResponse($items, $context), 200);
+        $result = $this->tryGrant($newCallbacks);
+
+        if($result instanceof AccessDeniedException) {
+            throw new AccessDeniedException("List is not allowed.");
         }
 
-        throw new AccessDeniedException("List is not allowed.");
+        list($items, $context) = $result;
+        return $this->view($this->listResponse($items, $context), 200);
     }
 
     /**
@@ -96,22 +103,30 @@ abstract class ErpApiQuery extends FOSRestController
 
     protected function getQuery($id, ServerRequestInterface $request, $callbacks)
     {
-        foreach($callbacks as $grantText => $callback) {
-            $grants = preg_split('/\s+/', $grantText);
-            if (!$this->grant($grants, [])) continue;
+        $newCallbacks = array_map(function($callback) use ($id, $request) {
+            return function($grants) use ($id, $request, $callback) {
+                $queryParams = $request->getQueryParams();
+                $item = null;
+                $context = [];
 
-            $queryParams = $request->getQueryParams();
-            $item = null;
-            $context = [];
+                $item = $callback($id, $queryParams, $context);
 
-            $item = $callback($id, $queryParams, $context);
+                if (!$this->grant($grants, [$item])) {
+                    return new ContinueException();
+                }
 
-            if (!$this->grant($grants, [$item])) continue;
+                return [$item, $context];
+            };
+        }, $callbacks);
 
-            return $this->view($this->getResponse($item, $context), 200);
+        $result = $this->tryGrant($newCallbacks);
+
+        if($result instanceof AccessDeniedException) {
+            throw new AccessDeniedException("Get is not allowed.");
         }
 
-        throw new AccessDeniedException("Get is not allowed.");
+        list($item, $context) = $result;
+        return $this->view($this->getResponse($item, $context), 200);
     }
 
     /**
