@@ -23,4 +23,14 @@ interface ErpQuery extends Query
      * @return array
      */
     public function search(array $params, array &$context = null);
+
+    /**
+     * Finds an object by its primary key / identifier.
+     *
+     * @param mixed $id The identifier.
+     * @param mixed $params Parameters.
+     *
+     * @return object|null The object.
+     */
+    public function findWith($id, ?array $params = null);
 }

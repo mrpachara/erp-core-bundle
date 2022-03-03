@@ -141,7 +141,7 @@ abstract class ErpApiQuery extends FOSRestController
     {
         return $this->getQuery($id, $request, [
             'get' => function($id, $queryParams, &$context) {
-                return $this->domainQuery->find($id);
+                return $this->domainQuery->findWith($id, $queryParams);
             },
         ]);
     }
