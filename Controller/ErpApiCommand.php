@@ -86,13 +86,14 @@ abstract class ErpApiCommand extends FOSRestController
         $newCallbacks = array_map(function($callback) use ($request) {
             return function($grants) use ($request, $callback) {
                 $data = $this->extractData($request, self::FOR_CREATE);
+                $queryParams = $request->attributes->get('queryParams', []);
 
                 /********************************************************************
                  * NOTE: MUST throw exception, unless transaction will be commited. *
                  ********************************************************************/
-                $item = $this->commandHandler->execute(function ($em) use ($callback, $data, $grants) {
+                $item = $this->commandHandler->execute(function ($em) use ($callback, $data, $queryParams, $grants) {
                     $class = $this->domainQuery->getClassName();
-                    if (!($item = $callback($class, $data))) {
+                    if (!($item = $callback($class, $data, $queryParams))) {
                         throw new AccessDeniedException("Create is not allowed.");
                     }
 
@@ -155,7 +156,7 @@ abstract class ErpApiCommand extends FOSRestController
     public function createAction(Request $request)
     {
         return $this->createCommand($request, [
-            'add' => function ($class, &$data) {
+            'add' => function ($class, &$data, array $queryParams) {
                 return new $class();
             },
         ]);
@@ -166,15 +167,16 @@ abstract class ErpApiCommand extends FOSRestController
         $newCallbacks = array_map(function($callback) use ($id, $request) {
             return function($grants) use ($id, $request, $callback) {
                 $data = $this->extractData($request, self::FOR_UPDATE);
+                $queryParams = $request->attributes->get('queryParams', []);
 
                 /********************************************************************
                  * NOTE: MUST throw exception, unless transaction will be commited. *
                  ********************************************************************/
-                $item = $this->commandHandler->execute(function ($em) use ($callback, $id, $data, $grants) {
-                    if (!($item = $callback($id, $data))) {
+                $item = $this->commandHandler->execute(function ($em) use ($callback, $id, $data, $queryParams, $grants) {
+                    if (!($item = $callback($id, $data, $queryParams))) {
                         throw new NotFoundHttpException("Entity not found.");
                     }
-                    $em->lock($item, LockMode::PESSIMISTIC_WRITE);
+                    //$em->lock($item, LockMode::PESSIMISTIC_WRITE);
                     if (!$this->grant($grants, [$item])) {
                         throw new AccessDeniedException("Update is not allowed.");
                     }
@@ -230,8 +232,12 @@ abstract class ErpApiCommand extends FOSRestController
     public function updateAction($id, Request $request)
     {
         return $this->updateCommand($id, $request, [
-            'edit' => function ($id, &$data) {
-                return $this->domainQuery->find($id);
+            'edit' => function ($id, &$data, array $queryParams) {
+                $queryParams['lock'] = [
+                    'mode' => LockMode::PESSIMISTIC_WRITE,
+                ];
+
+                return $this->domainQuery->findWith($id, $queryParams);
             },
         ]);
     }
@@ -240,14 +246,16 @@ abstract class ErpApiCommand extends FOSRestController
     {
         $newCallbacks = array_map(function($callback) use ($id, $request) {
             return function($grants) use ($id, $request, $callback) {
+                $queryParams = $request->attributes->get('queryParams', []);
+
                 /********************************************************************
                  * NOTE: MUST throw exception, unless transaction will be commited. *
                  ********************************************************************/
-                $item = $this->commandHandler->execute(function ($em) use ($callback, $id, $grants) {
-                    if (!($item = $callback($id))) {
+                $item = $this->commandHandler->execute(function ($em) use ($callback, $id, $queryParams, $grants) {
+                    if (!($item = $callback($id, $queryParams))) {
                         throw new NotFoundHttpException("Entity not found.");
                     }
-                    $em->lock($item, LockMode::PESSIMISTIC_WRITE);
+                    //$em->lock($item, LockMode::PESSIMISTIC_WRITE);
                     if (!$this->grant($grants, [$item])) {
                         throw new AccessDeniedException("Delete is not allowed.");
                     }
@@ -303,8 +311,12 @@ abstract class ErpApiCommand extends FOSRestController
     public function deleteAction($id, Request $request)
     {
         return $this->deleteCommand($id, $request, [
-            'delete' => function ($id) {
-                return $this->domainQuery->find($id);
+            'delete' => function ($id, array $queryParams) {
+                $queryParams['lock'] = [
+                    'mode' => LockMode::PESSIMISTIC_WRITE,
+                ];
+
+                return $this->domainQuery->findWith($id, $queryParams);
             },
         ]);
     }

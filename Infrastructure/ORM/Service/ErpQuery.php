@@ -52,11 +52,9 @@ abstract class ErpQuery implements QueryInterface
     /**
      * {@inheritDoc}
      */
-    public function find($id)
+    public function find($id, $lockMode = null, $lockVersion = null)
     {
-        $arguments = func_get_args();
-
-        return call_user_func_array([$this->repository, 'find'], $arguments);
+        return $this->repository->find($id, $lockMode, $lockVersion);
     }
 
     /**
@@ -166,7 +164,12 @@ abstract class ErpQuery implements QueryInterface
 
     public function findWith($id, ?array $params = null)
     {
-        return $this->find($id);
+        $lock = array_merge([
+            'mode' => null,
+            'version' => null,
+        ], ($params && key_exists('lock', $params))? $params['lock'] : []);
+
+        return $this->find($id, $lock['mode'], $lock['version']);
     }
 
     public function __call($name, $arguments)
