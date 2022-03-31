@@ -3,14 +3,25 @@
 namespace Erp\Bundle\CoreBundle\Authorization;
 
 use Erp\Bundle\CoreBundle\Entity\StatusPresentable;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\Security;
 
 abstract class AbstractErpAuthorization
 {
-    /** @var \Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface */
-    protected $authorizationChecker;
-    
+    /** @var Security */
+    protected $security;
+
     /** @required */
-    public function setAuthorizationChecker(\Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface $authorizationChecker)
+    public function setSecurity(Security $security)
+    {
+        $this->security = $security;
+    }
+
+    /** @var AuthorizationCheckerInterface */
+    protected $authorizationChecker;
+
+    /** @required */
+    public function setAuthorizationChecker(AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->authorizationChecker = $authorizationChecker;
     }

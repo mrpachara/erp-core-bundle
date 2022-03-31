@@ -98,12 +98,13 @@ abstract class ErpApiCommand extends FOSRestController
                     }
 
                     if($this instanceof InitialItem) $this->initialItem($item);
+                    $item = $this->patchExistedItem($item, $data);
                     $em->persist($item);
                     if (!$this->grant($grants, [$item])) {
                         throw new AccessDeniedException("Create is not allowed.");
                     }
 
-                    return $this->patchExistedItem($item, $data);
+                    return $item;
                 });
 
                 return $item;
@@ -118,32 +119,6 @@ abstract class ErpApiCommand extends FOSRestController
 
         $item = $result;
         return $this->view(['data' => $this->domainQuery->find($item->getId())], 200);
-
-        // foreach($callbacks as $grantText => $callback) {
-        //     $grants = preg_split('/\s+/', $grantText);
-        //     if (!$this->grant($grants, [])) continue;
-
-        //     $data = $this->extractData($request, self::FOR_CREATE);
-
-        //     $item = $this->commandHandler->execute(function ($em) use ($callback, $data, $grants) {
-        //         $class = $this->domainQuery->getClassName();
-        //         if (!($item = $callback($class, $data))) {
-        //             throw new AccessDeniedException("Create is not allowed.");
-        //         }
-
-        //         if($this instanceof InitialItem) $this->initialItem($item);
-        //         $em->persist($item);
-        //         if (!$this->grant($grants, [$item])) {
-        //             throw new AccessDeniedException("Create is not allowed.");
-        //         }
-
-        //         return $this->patchExistedItem($item, $data);
-        //     });
-
-        //     return $this->view(['data' => $this->domainQuery->find($item->getId())], 200);
-        // }
-
-        // throw new AccessDeniedException("Create is not allowed.");
     }
 
     /**
