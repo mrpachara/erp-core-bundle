@@ -16,13 +16,13 @@ trait ErpContextTrait
         return $context;
     }
 
-    protected function prepareActions($actions, $obj)
+    protected function prepareActions($actions, $obj = null)
     {
         $actions = (array)$actions;
 
         foreach ($actions as $action) {
             $removed = true;
-            if ($this->grant($action, [$obj])) {
+            if ($this->grant($action, ($obj === null)? [] : [$obj])) {
                 $removed = false;
             }
 
