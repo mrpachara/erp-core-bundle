@@ -23,6 +23,11 @@ abstract class ErpApiQuery extends FOSRestController
      */
     protected $domainQuery;
 
+    protected function extendListContext(array $context): array
+    {
+        return $context;
+    }
+
     protected function listResponse($data, $context)
     {
         $context = $this->prepareContext($context);
@@ -37,6 +42,8 @@ abstract class ErpApiQuery extends FOSRestController
             }
         }
 
+        $context = $this->extendListContext($context);
+
         $context['actions'] = $this->prepareActions($context['actions']);
         $context['data'] = $data;
 
@@ -45,8 +52,8 @@ abstract class ErpApiQuery extends FOSRestController
 
     protected function listQuery(ServerRequestInterface $request, $callbacks)
     {
-        $newCallbacks = array_map(function($callback) use ($request) {
-            return function($grants) use ($request, $callback) {
+        $newCallbacks = array_map(function ($callback) use ($request) {
+            return function ($grants) use ($request, $callback) {
                 $queryParams = $request->getQueryParams();
                 $items = [];
                 $context = [];
@@ -59,7 +66,7 @@ abstract class ErpApiQuery extends FOSRestController
 
         $result = $this->tryGrant($newCallbacks);
 
-        if($result instanceof AccessDeniedException) {
+        if ($result instanceof AccessDeniedException) {
             throw new AccessDeniedException("List is not allowed.");
         }
 
@@ -77,7 +84,7 @@ abstract class ErpApiQuery extends FOSRestController
     public function listAction(ServerRequestInterface $request)
     {
         return $this->listQuery($request, [
-            'list' => function($queryParams, &$context) {
+            'list' => function ($queryParams, &$context) {
                 if (!empty($queryParams)) {
                     return $this->domainQuery->search($queryParams, $context);
                 } else {
@@ -87,13 +94,23 @@ abstract class ErpApiQuery extends FOSRestController
         ]);
     }
 
+    protected function extendGetContext(array $context): array
+    {
+        return $context;
+    }
+
     protected function getResponse($data, $context)
     {
-        if(empty($data)) throw new NotFoundHttpException("Entity not found.");
+        if (empty($data)) throw new NotFoundHttpException("Entity not found.");
         $context = $this->prepareContext($context);
 
-        $context['actions'][] = 'edit';
-        $context['actions'][] = 'delete';
+        foreach (['edit', 'delete'] as $action) {
+            if (!in_array($action, $context['actions'])) {
+                $context['actions'][] = $action;
+            }
+        }
+
+        $context = $this->extendGetContext($context);
 
         $context['actions'] = $this->prepareActions($context['actions'], $data);
         $context['data'] = $data;
@@ -103,8 +120,8 @@ abstract class ErpApiQuery extends FOSRestController
 
     protected function getQuery($id, ServerRequestInterface $request, $callbacks)
     {
-        $newCallbacks = array_map(function($callback) use ($id, $request) {
-            return function($grants) use ($id, $request, $callback) {
+        $newCallbacks = array_map(function ($callback) use ($id, $request) {
+            return function ($grants) use ($id, $request, $callback) {
                 $queryParams = $request->getQueryParams();
                 $item = null;
                 $context = [];
@@ -121,7 +138,7 @@ abstract class ErpApiQuery extends FOSRestController
 
         $result = $this->tryGrant($newCallbacks);
 
-        if($result instanceof AccessDeniedException) {
+        if ($result instanceof AccessDeniedException) {
             throw new AccessDeniedException("Get is not allowed.");
         }
 
@@ -140,7 +157,7 @@ abstract class ErpApiQuery extends FOSRestController
     public function getAction($id, ServerRequestInterface $request)
     {
         return $this->getQuery($id, $request, [
-            'get' => function($id, $queryParams, &$context) {
+            'get' => function ($id, $queryParams, &$context) {
                 return $this->domainQuery->findWith($id, $queryParams);
             },
         ]);

@@ -9,8 +9,8 @@ abstract class CoreAccount implements StatusPresentable
 {
 
     /**
-    * @var string
-    */
+     * @var string
+     */
     private $id;
 
     /**
@@ -47,7 +47,7 @@ abstract class CoreAccount implements StatusPresentable
      */
     public function __construct(Thing $thing = null)
     {
-        $this->thing = ($thing === null)? new Thing() : $thing;
+        $this->thing = ($thing === null) ? new Thing() : $thing;
     }
 
     /**
@@ -59,7 +59,7 @@ abstract class CoreAccount implements StatusPresentable
     {
         return $this->id;
     }
-    
+
     /**
      * Set thing
      *
@@ -195,4 +195,9 @@ abstract class CoreAccount implements StatusPresentable
     {
         return $this->active;
     }
+
+    // public function __toString()
+    // {
+    //     return $this->getId();
+    // }
 }
