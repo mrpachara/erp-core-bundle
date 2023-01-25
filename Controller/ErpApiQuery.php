@@ -28,6 +28,11 @@ abstract class ErpApiQuery extends FOSRestController
         return $context;
     }
 
+    protected function reduceListData($data)
+    {
+        return $data;
+    }
+
     protected function listResponse($data, $context)
     {
         $context = $this->prepareContext($context);
@@ -45,7 +50,7 @@ abstract class ErpApiQuery extends FOSRestController
         $context = $this->extendListContext($context);
 
         $context['actions'] = $this->prepareActions($context['actions']);
-        $context['data'] = $data;
+        $context['data'] = $this->reduceListData($data);
 
         return $context;
     }
