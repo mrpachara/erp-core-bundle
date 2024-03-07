@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * FileUpload Api Controller
@@ -53,7 +54,7 @@ class FileUploadApiController extends FOSRestController
     public function getAction(string $uuid)
     {
         $tempFileItem = $this->domainQuery->get($uuid);
-        
+
         //return $this->view($tempFileItem->getData(), 200, ['ContentType' => $tempFileItem->getMimeType()]);
         return new Response(stream_get_contents($tempFileItem->getData()), Response::HTTP_OK, ['Content-Type' => $tempFileItem->getMimeType()]);
     }
@@ -61,7 +62,7 @@ class FileUploadApiController extends FOSRestController
     /**
      * Put action
      *
-     * @Rest\Put("")
+     * @Rest\Post("")
      *
      * @param Request $request
      *
@@ -70,14 +71,23 @@ class FileUploadApiController extends FOSRestController
     public function putAction(Request $request)
     {
         $tempFileItem = new \Erp\Bundle\CoreBundle\Entity\TempFileItem();
-        
-        $this->commandHandler->execute(function() use($request, $tempFileItem) {
-            $tempFileItem->setData($request->getContent());
-            $tempFileItem->setMimeType($request->headers->get('CONTENT_TYPE'));
-            
-            $this->commandHandler->persist($tempFileItem);
+
+        $this->commandHandler->execute(function () use ($request, $tempFileItem) {
+            // $tempFileItem->setData($request->getContent());
+            // $tempFileItem->setMimeType($request->headers->get('CONTENT_TYPE'));
+
+            $file = $request->files->get('file');
+            $content = file_get_contents($file->getRealPath());
+            if ($content !== false) {
+                $tempFileItem->setData($content);
+                $tempFileItem->setMimeType($file->getMimeType());
+
+                $this->commandHandler->persist($tempFileItem);
+            } else {
+                throw new BadRequestHttpException("Cannot get file content");
+            }
         });
-        
+
         return $this->view(['data' => [
             'uuid' => $tempFileItem->getUuid(),
         ]], 200);
@@ -96,7 +106,7 @@ class FileUploadApiController extends FOSRestController
     {
         $tempFileItem = $this->domainQuery->get($uuid);
 
-        $this->commandHandler->execute(function() use($tempFileItem) {
+        $this->commandHandler->execute(function () use ($tempFileItem) {
             $this->commandHandler->remove($tempFileItem);
         });
 
